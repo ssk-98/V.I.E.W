@@ -1,4 +1,15 @@
+user=hysteresis
 rnn_model=../data/caption_en_model40.model
 cnn_model=../data/ResNet50.model
 dictionary=../data/mscoco_caption.json
+maps_api=NuWLrM7oE23-PKjQWHD79izu0aFFvYdEu7wZV0SanSE
+maxradius=50
 shortanswer=3
+longanswer=5
+voiceouten=0
+voiceinen=0
+textouten=1
+videoen=1
+voicespeed=130
+minreadlines=2
+veryshortanswer=2

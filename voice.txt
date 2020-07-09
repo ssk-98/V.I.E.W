@@ -1,0 +1,11 @@
+maps=maps
+facerec=face recognition=face
+ocr=ocr=read
+caption=generate caption=caps
+exit=exit=quit=cancel=abort
+config=load configuration=loadc
+voices=load voices=loadv
+goodbye=closing camera goodbye
+revgeocode=where am i
+pin=pin location
+help=help

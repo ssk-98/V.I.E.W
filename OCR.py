@@ -2,7 +2,6 @@ from PIL import Image
 import pytesseract as pyt
 import cv2
 import numpy as np
-from STT import stt_min,tts
 
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -54,22 +53,8 @@ def ocr(image):
 
     custom_config = r'-l eng --oem 3 --psm 6'
     output = pyt.image_to_string(img, config = custom_config)
-    
-    read_short = output.split("\n")
-    tts(read_short[0])
+    return output
 
-    for i in range(len(output)):
-        
-        if output[i] == "\n":
-            tts("Do you want to continue reading?")
-            operation = stt_min(3)
-            if operation == "yes":
-                tts(output)
-                break
-            else:
-                tts("Goodbye")
-                break
-	
 
     
 

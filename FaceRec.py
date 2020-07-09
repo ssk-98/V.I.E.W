@@ -1,43 +1,13 @@
 import cv2
 import time
 import subprocess
-import glob
 import face_recognition
-import argparse
 import pickle
+import sys
+import os
+
 from CaptionGenerator import CaptionGenerator
-from STT import tts,stt_min
 
-def video_features(caption_generator,data):
-    while True:
-        tts("Choose a mode")
-        operation = stt_min(3)
-        if operation == "exit" or operation =="quit":
-            tts("Exiting Video")
-            break
-        elif operation ==("face"):
-            tts("Searching for face")
-            for images in glob.glob("./face_imgs/*"):
-                print(images)
-                img = cv2.imread(images)
-                names = facerec(img,data)
-                for name in names:
-                    tts(name)
-            break
-        elif operation == "caption":
-            tts("Generating caption")
-            for images in glob.glob("./caption_imgs/*.jpg"):
-                print(images)
-                img = cv2.imread(images)
-                captions=caption(img,caption_generator)
-                for p in captions:
-                    text = " ".join(p[1:-1])
-                    tts(text)
-            break
-        else:
-            tts("retry")
-
-    
 
 def facerec(image,data):
     boxes = face_recognition.face_locations(image,model='hog')
@@ -63,4 +33,45 @@ def caption(frame,caption_generator):
     cap=[]
     for i in captions:
         cap.append(i["sentence"])
-    return cap
+    return cap[0]
+
+def main():
+    face_data = pickle.loads(open('./encoding.pickle', "rb").read())
+    caption_generator=CaptionGenerator(
+        rnn_model_place=sys.argv[1],
+        cnn_model_place=sys.argv[2],
+        dictionary_place=sys.argv[3],
+        )
+    print("Caption generator Model loaded")
+    while True:
+        f = open("./Function","r")
+        try:
+            command = f.readlines()[0]
+        except:
+            command = "a"
+        f.close()
+        if command == "q":
+            break
+        elif command == "r":
+            img = cv2.imread("./frame.jpg")
+            names = facerec(img,face_data)
+            f=open("./Output.txt","w+")
+            f.write(",".join(names))
+            f.close()
+            f=open("./Function","w+")
+            f.write("a")
+            f.close()
+        elif command == "c":
+            img = cv2.imread("./frame.jpg")
+            captions=caption(img,caption_generator)
+            f=open("./Output.txt","w+")
+            f.write(" ".join(captions[1:-1]))
+            f.close()
+            f=open("./Function","w+")
+            f.write("a")
+            f.close()
+        time.sleep(2)
+            
+
+if __name__ == "__main__":
+    main()

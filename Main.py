@@ -1,64 +1,68 @@
-import pickle
+import os
+import time
 import subprocess
-from subprocess import call
+import cv2
 
-from CaptionGenerator import CaptionGenerator
-#from Maps import maps
-from STT import stt,tts
-from DistanceMeasurement import measurement
+from Initial import Main
+import Maps
 from OCR import ocr
-from FaceRec import facerec,caption
 
-
-class Main:
-    def __init__(self):
-        self.face_data = pickle.loads(open('./encoding.pickle', "rb").read())
-        self.config={}
-        self.voice={}
-        configs = open("./config.txt","r")
-        for line in configs:
-            line = line.rstrip()
-            line = line.split("=")
-            self.config[line[0]]= line[1]
-        configs.close()
-        voices = open("./Voice.txt","r")
-        for line in voices:
-            line = line.rstrip()
-            line = line.split("=")
-            self.voice[line[0]]= str(line[1:])
-        voices.close()
-        self.caption_generator=CaptionGenerator(
-        rnn_model_place=self.getconfig("rnn_model"),
-        cnn_model_place=self.getconfig("cnn_model"),
-        dictionary_place=self.getconfig("dictionary"),
-        )
-        print("Loading done starting subprocess")
-        subprocess.call('./Video.py')
-        
-    def getconfig(self,conf):
-        return self.config[conf]
-    
-    def getvoice(self,voice):
-        return self.voice[voice]
-
-    def loop(self):
+if __name__=="__main__":
+        start = Main()
+        maps = Maps.Maps()
+        start.tts("welcome back")
         while True:
-            tts(self.getvoice("mainloop"))
-            operation = stt(int(self.getconfig("shortanswer")))
-            tts(operation)
-            if operation == self.getvoice("maps"):
-                maps()
-            if operation == self.getvoice("facerec"):
-                print("face")
-            if operation == self.getvoice("ocr"):
-                print("ocr")
-            if operation in self.getvoice("exit"):
-                Function.open("./Function")
-                Function.write("q")
-                Function.close()
-                return 
-
-if __name__ == '__main__':
-    start = Main()
-    start.loop()
+            start.tts("Choose a function")
+            operation = start.stt("shortanswer")
+            if operation in start.getcommand("maps"):
+                maps.mapsloop()
+            elif operation in start.getcommand("facerec"):
+                start.writefunction("f")
+                while (not (start.readfunction()=="a")):
+                        time.sleep(0.1)
+                start.writefunction("r")
+                start.modeluse = True
+            elif operation in start.getcommand("ocr"):
+                start.writefunction("f")
+                time.sleep(1)
+                img = cv2.imread("./frame.jpg")
+                output = ocr(img)
+                read_short = output.split("\n")
+                start.tts(",".join(read_short[0:start.getconfig("minreadlines")]))
+                if len(read_short) > 2:
+                        start.tts("Continue")
+                        operation = start.stt("veryshortanswer")
+                else:
+                        operation = "no"
+                if operation == "yes":
+                    for i in range(start.getconfig("minreadlines"),len(read_short)):
+                        start.tts(read_short[i])     
+            elif operation in start.getcommand("caption"):
+                start.writefunction("f")
+                while (not (start.readfunction()=="a")):
+                        time.sleep(0.1)
+                start.writefunction("c")
+                start.modeluse = True
+            elif operation in start.getcommand("config"):
+                start.loadconfig()
+            elif operation in start.getcommand("voices"):
+                start.loadvoice()
+            elif operation in start.getcommand("exit"):
+                start.writefunction("q")
+                start.tts("goodbye")
+                exit()
+            elif operation in start.getcommand("help"):
+                start.tts("available commands are maps,facerec,ocr,caption,config,voices,exit")
+            else:
+                start.tts("retry")
+            if start.modeluse:
+                if os.path.isfile("./Output.txt") and start.readfunction()=="a":
+                    f = open("./Output.txt","r")
+                    output = f.readlines()[0]
+                    f.close()
+                    start.tts(output)
+                    os.remove("./Output.txt")
+                    start.modeluse = False
+                        
+                    
 
