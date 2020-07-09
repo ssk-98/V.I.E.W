@@ -1,0 +1,4 @@
+rnn_model=../data/caption_en_model40.model
+cnn_model=../data/ResNet50.model
+dictionary=../data/mscoco_caption.json
+shortanswer=3

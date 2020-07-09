@@ -1,0 +1,6 @@
+mainloop=welcome choose an option
+maps=maps
+facerec=facerec
+ocr=ocr
+exit=exit=quit=cancel=abort
+
